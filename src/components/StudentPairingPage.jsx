@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Upload, CheckCircle, AlertTriangle, Brain } from 'lucide-react';
+import { Upload, CheckCircle, AlertTriangle } from 'lucide-react';
 import FileUpload from './FileUpload';
 import PairsDisplay from './PairsDisplay';
-import StudentFactorsForm from './StudentFactorsForm';
 import { generatePairs, regeneratePairs } from '../utils/pairingAlgorithm';
 
 const StudentPairingPage = () => {
@@ -13,26 +12,20 @@ const StudentPairingPage = () => {
   const [isApproved, setIsApproved] = useState(false);
   const [currentStrategy, setCurrentStrategy] = useState('optimal');
   const [notification, setNotification] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showAIConfig, setShowAIConfig] = useState(false);
-  const [additionalFactors, setAdditionalFactors] = useState({});
-  const [classContext, setClassContext] = useState({});
-  const [teacherPreferences, setTeacherPreferences] = useState({});
 
   const showNotification = (message, type = 'success') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 5000);
   };
 
-  const handleDataLoaded = async (studentData, file) => {
+  const handleDataLoaded = (studentData, file) => {
     try {
-      setIsLoading(true);
       setStudents(studentData);
       setFileName(file);
       setIsApproved(false);
       
       // Generate initial pairs
-      const result = await generatePairs(studentData, { pairingStrategy: 'optimal' });
+      const result = generatePairs(studentData, { pairingStrategy: 'optimal' });
       setPairs(result.pairs);
       setStats(result.stats);
       setCurrentStrategy('optimal');
@@ -40,8 +33,6 @@ const StudentPairingPage = () => {
       showNotification(`Successfully processed ${studentData.length} students from ${file}`);
     } catch (error) {
       showNotification(`Error generating pairs: ${error.message}`, 'error');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -77,14 +68,10 @@ const StudentPairingPage = () => {
     showNotification('All pairs approved! You can now proceed with peer learning activities.');
   };
 
-  const handleRegeneratePairs = async () => {
+  const handleRegeneratePairs = () => {
     try {
-      setIsLoading(true);
-      const result = await regeneratePairs(students, pairs, { 
-        currentStrategy,
-        additionalFactors,
-        classContext,
-        teacherPreferences
+      const result = regeneratePairs(students, pairs, { 
+        currentStrategy
       });
       
       setPairs(result.pairs);
@@ -95,8 +82,6 @@ const StudentPairingPage = () => {
       showNotification(`Pairs regenerated using ${result.stats.pairingStrategy} strategy`);
     } catch (error) {
       showNotification(`Error regenerating pairs: ${error.message}`, 'error');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -117,15 +102,9 @@ const StudentPairingPage = () => {
     }
   };
 
-  const handleStrategyChange = async (newStrategy) => {
+  const handleStrategyChange = (newStrategy) => {
     try {
-      setIsLoading(true);
-      const result = await generatePairs(students, { 
-        pairingStrategy: newStrategy,
-        additionalFactors,
-        classContext,
-        teacherPreferences
-      });
+      const result = generatePairs(students, { pairingStrategy: newStrategy });
       setPairs(result.pairs);
       setStats(result.stats);
       setCurrentStrategy(newStrategy);
@@ -134,38 +113,6 @@ const StudentPairingPage = () => {
       showNotification(`Pairs regenerated using ${newStrategy} strategy`);
     } catch (error) {
       showNotification(`Error changing strategy: ${error.message}`, 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleFactorsUpdate = (factors) => {
-    setAdditionalFactors(factors.additionalFactors);
-    setClassContext(factors.classContext);
-    setTeacherPreferences(factors.teacherPreferences);
-    showNotification('AI configuration updated! Use AI strategy to apply these settings.');
-  };
-
-  const handleUseAI = async () => {
-    try {
-      setIsLoading(true);
-      const result = await generatePairs(students, {
-        pairingStrategy: 'ai',
-        additionalFactors,
-        classContext,
-        teacherPreferences
-      });
-      
-      setPairs(result.pairs);
-      setStats(result.stats);
-      setCurrentStrategy('ai');
-      setIsApproved(false);
-      
-      showNotification('AI-powered pairs generated successfully!');
-    } catch (error) {
-      showNotification(`AI pairing error: ${error.message}`, 'error');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -229,24 +176,14 @@ const StudentPairingPage = () => {
             {/* Strategy Selection */}
             {students.length > 0 && (
               <div className="mt-4 pt-4 border-t">
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Pairing Strategy
-                  </label>
-                  <button
-                    onClick={() => setShowAIConfig(!showAIConfig)}
-                    className="flex items-center px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 transition-colors"
-                  >
-                    <Brain className="h-3 w-3 mr-1" />
-                    AI Config
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Pairing Strategy
+                </label>
+                <div className="flex space-x-4">
                   {[
                     { value: 'optimal', label: 'Optimal (High-Low)' },
                     { value: 'balanced', label: 'Balanced Mix' },
-                    { value: 'random', label: 'Random' },
-                    { value: 'ai', label: 'AI-Powered 🤖' }
+                    { value: 'random', label: 'Random' }
                   ].map(strategy => (
                     <label key={strategy.value} className="flex items-center">
                       <input
@@ -255,47 +192,15 @@ const StudentPairingPage = () => {
                         value={strategy.value}
                         checked={currentStrategy === strategy.value}
                         onChange={(e) => handleStrategyChange(e.target.value)}
-                        disabled={isLoading}
                         className="mr-2"
                       />
-                      <span className={`text-sm ${
-                        strategy.value === 'ai' ? 'text-blue-700 font-medium' : 'text-gray-700'
-                      }`}>
-                        {strategy.label}
-                      </span>
+                      <span className="text-sm text-gray-700">{strategy.label}</span>
                     </label>
                   ))}
                 </div>
-                {currentStrategy === 'ai' && (
-                  <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded">
-                    <p className="text-sm text-blue-800">
-                      <strong>AI Mode:</strong> Configure additional factors below for intelligent pairing decisions.
-                      {!Object.keys(additionalFactors).length && " Use 'AI Config' to add student details."}
-                    </p>
-                  </div>
-                )}
               </div>
             )}
           </div>
-
-          {/* AI Configuration Section */}
-          {showAIConfig && students.length > 0 && (
-            <StudentFactorsForm
-              students={students}
-              onFactorsUpdate={handleFactorsUpdate}
-              className="mb-6"
-            />
-          )}
-
-          {/* Loading State */}
-          {isLoading && (
-            <div className="bg-white rounded-lg shadow-sm border p-6 text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">
-                {currentStrategy === 'ai' ? 'AI is analyzing students and generating optimal pairs...' : 'Generating pairs...'}
-              </p>
-            </div>
-          )}
 
           {/* Approval Status */}
           {isApproved && pairs.length > 0 && (

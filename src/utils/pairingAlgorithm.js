@@ -1,50 +1,11 @@
 /**
- * Enhanced student pairing algorithm with AI integration
- * Supports both traditional rule-based and AI-powered pairing strategies
+ * Traditional student pairing algorithm
+ * Uses rule-based strategies for pairing students based on performance
  */
 
-import AIPairingService from '../services/aiPairingService.js';
-
-const aiService = new AIPairingService();
-
-export const generatePairs = async (students, options = {}) => {
+export const generatePairs = (students, options = {}) => {
   const {
-    pairingStrategy = 'optimal', // 'optimal', 'random', 'balanced', 'ai'
-    maxPairSize = 2,
-    allowOddGroups = true,
-    aiOptions = {},
-    additionalFactors = {},
-    classContext = {},
-    teacherPreferences = {}
-  } = options;
-
-  if (!students || students.length < 2) {
-    throw new Error('At least 2 students required for pairing');
-  }
-
-  // AI-powered pairing
-  if (pairingStrategy === 'ai') {
-    try {
-      return await aiService.generateAIPairs(students, {
-        pairingGoals: aiOptions.pairingGoals || ['peer_tutoring'],
-        additionalFactors,
-        classContext,
-        teacherPreferences
-      });
-    } catch (error) {
-      console.warn('AI pairing failed, falling back to optimal strategy:', error);
-      // Fall back to optimal strategy if AI fails
-      return generateTraditionalPairs(students, { ...options, pairingStrategy: 'optimal' });
-    }
-  }
-
-  // Traditional rule-based pairing
-  return generateTraditionalPairs(students, options);
-};
-
-export const generateTraditionalPairs = (students, options = {}) => {
-  const {
-    pairingStrategy = 'optimal',
+    pairingStrategy = 'optimal', // 'optimal', 'random', 'balanced'
     maxPairSize = 2,
     allowOddGroups = true
   } = options;
@@ -294,7 +255,7 @@ const generateRecommendation = (pair) => {
   }
 };
 
-export const regeneratePairs = async (students, currentPairs, options = {}) => {
+export const regeneratePairs = (students, currentPairs, options = {}) => {
   // Avoid previous pairings if possible
   const previousPairings = new Set();
   currentPairs.forEach(pair => {
@@ -306,22 +267,14 @@ export const regeneratePairs = async (students, currentPairs, options = {}) => {
   });
 
   // Try different strategies for regeneration
-  const strategies = ['ai', 'balanced', 'optimal', 'random'];
+  const strategies = ['balanced', 'optimal', 'random'];
   const excludeStrategy = options.currentStrategy || 'optimal';
   const availableStrategies = strategies.filter(s => s !== excludeStrategy);
   
   const selectedStrategy = availableStrategies[Math.floor(Math.random() * availableStrategies.length)];
   
-  // Add context about previous pairings for AI
-  const enhancedOptions = {
-    ...options,
-    pairingStrategy: selectedStrategy,
-    teacherPreferences: {
-      ...options.teacherPreferences,
-      avoidPreviousPairings: Array.from(previousPairings),
-      regenerationReason: 'Teacher requested different pairing approach'
-    }
-  };
-  
-  return await generatePairs(students, enhancedOptions);
+  return generatePairs(students, { 
+    ...options, 
+    pairingStrategy: selectedStrategy 
+  });
 };

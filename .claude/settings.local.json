@@ -9,7 +9,8 @@
       "Bash(npm uninstall:*)",
       "Bash(rm:*)",
       "Bash(git add:*)",
-      "Bash(gh pr create:*)"
+      "Bash(gh pr create:*)",
+      "Bash(git commit:*)"
     ],
     "deny": []
   }
