@@ -3,10 +3,11 @@
  * Uses rule-based strategies for pairing students based on performance
  */
 
+import { PAIR_TYPES } from '../constants/pairTypes.js';
+
 export const generatePairs = (students, options = {}) => {
   const {
     pairingStrategy = 'optimal', // 'optimal', 'random', 'balanced'
-    maxPairSize = 2,
     allowOddGroups = true
   } = options;
 
@@ -50,7 +51,7 @@ export const generatePairs = (students, options = {}) => {
           lastPair.students.push(student);
         });
         lastPair.size = lastPair.students.length;
-        lastPair.type = lastPair.size === 3 ? 'group-of-3' : 'extended-pair';
+        lastPair.type = lastPair.size === 3 ? PAIR_TYPES.GROUP_OF_3 : PAIR_TYPES.EXTENDED_PAIR;
       }
     }
   }
@@ -137,7 +138,7 @@ const generateOptimalPairs = (categorizedStudents) => {
     
     pairs.push({
       students: [lowStudent, highStudent],
-      type: 'high-low',
+      type: PAIR_TYPES.HIGH_LOW,
       size: 2,
       rationale: 'High performer mentors low performer'
     });
@@ -150,7 +151,7 @@ const generateOptimalPairs = (categorizedStudents) => {
     
     pairs.push({
       students: [student1, student2],
-      type: 'medium-medium',
+      type: PAIR_TYPES.MEDIUM_MEDIUM,
       size: 2,
       rationale: 'Similar level collaboration'
     });
@@ -164,7 +165,7 @@ const generateOptimalPairs = (categorizedStudents) => {
     
     pairs.push({
       students: [student1, student2],
-      type: 'mixed',
+      type: PAIR_TYPES.MIXED,
       size: 2,
       rationale: 'Mixed ability pairing'
     });
@@ -188,7 +189,7 @@ const generateBalancedPairs = (categorizedStudents) => {
     if (i + 1 < shuffled.length) {
       pairs.push({
         students: [shuffled[i], shuffled[i + 1]],
-        type: 'balanced',
+        type: PAIR_TYPES.BALANCED,
         size: 2,
         rationale: 'Balanced random pairing'
       });
@@ -206,7 +207,7 @@ const generateRandomPairs = (students) => {
     if (i + 1 < shuffled.length) {
       pairs.push({
         students: [shuffled[i], shuffled[i + 1]],
-        type: 'random',
+        type: PAIR_TYPES.RANDOM,
         size: 2,
         rationale: 'Random pairing'
       });

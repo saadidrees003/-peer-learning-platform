@@ -3,6 +3,7 @@ import { Upload, CheckCircle, AlertTriangle } from 'lucide-react';
 import FileUpload from './FileUpload';
 import PairsDisplay from './PairsDisplay';
 import { generatePairs, regeneratePairs } from '../utils/pairingAlgorithm';
+import { PAIRING_STRATEGIES, AVAILABLE_STRATEGIES } from '../constants/pairingStrategies';
 
 const StudentPairingPage = () => {
   const [students, setStudents] = useState([]);
@@ -10,7 +11,7 @@ const StudentPairingPage = () => {
   const [stats, setStats] = useState(null);
   const [fileName, setFileName] = useState('');
   const [isApproved, setIsApproved] = useState(false);
-  const [currentStrategy, setCurrentStrategy] = useState('optimal');
+  const [currentStrategy, setCurrentStrategy] = useState(PAIRING_STRATEGIES.OPTIMAL);
   const [notification, setNotification] = useState(null);
 
   const showNotification = (message, type = 'success') => {
@@ -25,10 +26,10 @@ const StudentPairingPage = () => {
       setIsApproved(false);
       
       // Generate initial pairs
-      const result = generatePairs(studentData, { pairingStrategy: 'optimal' });
+      const result = generatePairs(studentData, { pairingStrategy: PAIRING_STRATEGIES.OPTIMAL });
       setPairs(result.pairs);
       setStats(result.stats);
-      setCurrentStrategy('optimal');
+      setCurrentStrategy(PAIRING_STRATEGIES.OPTIMAL);
       
       showNotification(`Successfully processed ${studentData.length} students from ${file}`);
     } catch (error) {
@@ -180,11 +181,7 @@ const StudentPairingPage = () => {
                   Pairing Strategy
                 </label>
                 <div className="flex space-x-4">
-                  {[
-                    { value: 'optimal', label: 'Optimal (High-Low)' },
-                    { value: 'balanced', label: 'Balanced Mix' },
-                    { value: 'random', label: 'Random' }
-                  ].map(strategy => (
+                  {AVAILABLE_STRATEGIES.map(strategy => (
                     <label key={strategy.value} className="flex items-center">
                       <input
                         type="radio"

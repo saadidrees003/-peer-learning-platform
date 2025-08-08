@@ -12,6 +12,7 @@ import {
   CheckCircle,
   Info
 } from 'lucide-react';
+import { PAIR_TYPES, PAIR_TYPE_COLORS, PAIR_TYPE_LABELS, PAIR_TYPE_DEFAULTS } from '../constants/pairTypes';
 
 const PairsDisplay = ({ pairs, stats, onEditPair, onApprovePairs, onRegeneratePairs, className = '' }) => {
   const [editingPair, setEditingPair] = useState(null);
@@ -52,41 +53,11 @@ const PairsDisplay = ({ pairs, stats, onEditPair, onApprovePairs, onRegeneratePa
   };
 
   const getPairTypeColor = (type) => {
-    switch (type) {
-      case 'high-low':
-        return 'bg-blue-50 border-blue-200';
-      case 'medium-medium':
-        return 'bg-green-50 border-green-200';
-      case 'mixed':
-        return 'bg-purple-50 border-purple-200';
-      case 'balanced':
-        return 'bg-orange-50 border-orange-200';
-      case 'random':
-        return 'bg-gray-50 border-gray-200';
-      default:
-        return 'bg-gray-50 border-gray-200';
-    }
+    return PAIR_TYPE_COLORS[type] || PAIR_TYPE_DEFAULTS.color;
   };
 
   const getPairTypeLabel = (type) => {
-    switch (type) {
-      case 'high-low':
-        return 'High-Low Pairing';
-      case 'medium-medium':
-        return 'Similar Level';
-      case 'mixed':
-        return 'Mixed Ability';
-      case 'balanced':
-        return 'Balanced';
-      case 'random':
-        return 'Random';
-      case 'group-of-3':
-        return 'Group of 3';
-      case 'extended-pair':
-        return 'Extended Pair';
-      default:
-        return 'Standard Pair';
-    }
+    return PAIR_TYPE_LABELS[type] || PAIR_TYPE_DEFAULTS.label;
   };
 
   if (!pairs || pairs.length === 0) {
@@ -243,7 +214,7 @@ const PairsDisplay = ({ pairs, stats, onEditPair, onApprovePairs, onRegeneratePa
                 </div>
               ) : (
                 // Display Mode
-                pair.students.map((student, index) => (
+                pair.students.map((student) => (
                   <div key={student.id} className="bg-white p-4 rounded-lg border shadow-sm">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
