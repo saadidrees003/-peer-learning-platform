@@ -13,6 +13,15 @@ export const generateLessonSummary = async (extractedText, options = {}) => {
   } = options;
 
   try {
+    console.log('Starting lesson summary generation...', {
+      textLength: extractedText.length,
+      gradeLevel,
+      maxSentences,
+      className,
+      subject,
+      pageRanges
+    });
+
     // Simulate AI processing delay
     await new Promise(resolve => setTimeout(resolve, 1500));
 

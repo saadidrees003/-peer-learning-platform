@@ -66,6 +66,24 @@ const StudentPairingPage = () => {
 
   const handleApprovePairs = () => {
     setIsApproved(true);
+    
+    // Save pairing history for performance trends analysis
+    const pairingHistory = {
+      id: `pairing-${Date.now()}`,
+      className: 'Class 3-A', // Could be made configurable
+      subject: 'Mathematics', // Could be made configurable
+      createdAt: new Date().toISOString(),
+      pairs: pairs,
+      students: students,
+      strategy: currentStrategy,
+      fileName: fileName
+    };
+    
+    const existingHistory = localStorage.getItem('pairingHistory');
+    const history = existingHistory ? JSON.parse(existingHistory) : [];
+    history.push(pairingHistory);
+    localStorage.setItem('pairingHistory', JSON.stringify(history));
+    
     showNotification('All pairs approved! You can now proceed with peer learning activities.');
   };
 

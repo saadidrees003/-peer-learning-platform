@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
-import { Users, BookOpen, Menu } from 'lucide-react'
+import { Users, BookOpen, TrendingUp, Menu } from 'lucide-react'
 import StudentPairingPage from './components/StudentPairingPage'
 import PDFLessonSummaryPage from './components/PDFLessonSummaryPage'
+import PerformanceTrendsPage from './components/PerformanceTrendsPage'
 import './App.css'
 
 function App() {
@@ -21,6 +22,13 @@ function App() {
       icon: BookOpen,
       component: PDFLessonSummaryPage,
       description: 'Upload PDF books and generate grade-appropriate lesson summaries'
+    },
+    {
+      id: 'trends',
+      name: 'Performance Trends',
+      icon: TrendingUp,
+      component: PerformanceTrendsPage,
+      description: 'Track student performance trends and analyze peer learning effectiveness'
     }
   ]
 

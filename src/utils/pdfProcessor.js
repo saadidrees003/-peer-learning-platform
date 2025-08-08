@@ -6,26 +6,34 @@
 import * as pdfjsLib from 'pdfjs-dist';
 
 // Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjsLib.version}/build/pdf.worker.min.mjs`;
 
 export const extractTextFromPDF = async (pdfFile, pageRanges = []) => {
   try {
+    console.log('Starting PDF text extraction...', { fileName: pdfFile.name, size: pdfFile.size });
+    
     // Convert file to ArrayBuffer
     const arrayBuffer = await pdfFile.arrayBuffer();
+    console.log('ArrayBuffer created, size:', arrayBuffer.byteLength);
     
     // Load PDF document
+    console.log('Loading PDF document...');
     const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    console.log('PDF loaded successfully');
     const totalPages = pdf.numPages;
+    console.log('Total pages:', totalPages);
     
     // Parse page ranges or use all pages
     const pagesToExtract = pageRanges.length > 0 
       ? parsePageRanges(pageRanges, totalPages)
       : Array.from({ length: totalPages }, (_, i) => i + 1);
+    console.log('Pages to extract:', pagesToExtract);
     
     // Extract text from specified pages
     const pageTexts = [];
     for (const pageNum of pagesToExtract) {
       if (pageNum <= totalPages && pageNum >= 1) {
+        console.log(`Extracting text from page ${pageNum}...`);
         const page = await pdf.getPage(pageNum);
         const textContent = await page.getTextContent();
         
@@ -36,6 +44,8 @@ export const extractTextFromPDF = async (pdfFile, pageRanges = []) => {
           .replace(/\s+/g, ' ') // Normalize whitespace
           .trim();
         
+        console.log(`Page ${pageNum} extracted ${pageText.length} characters`);
+        
         pageTexts.push({
           pageNumber: pageNum,
           text: pageText
@@ -43,11 +53,14 @@ export const extractTextFromPDF = async (pdfFile, pageRanges = []) => {
       }
     }
     
+    const fullText = pageTexts.map(p => p.text).join('\n\n');
+    console.log('Total text extracted:', fullText.length, 'characters');
+    
     return {
       success: true,
       totalPages,
       extractedPages: pageTexts,
-      fullText: pageTexts.map(p => p.text).join('\n\n')
+      fullText
     };
     
   } catch (error) {
